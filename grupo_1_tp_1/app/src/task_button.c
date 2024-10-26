@@ -44,6 +44,9 @@
 #include "logger.h"
 #include "dwt.h"
 
+#include "ao.h"
+#include "ao_ui.h"
+
 /********************** macros and definitions *******************************/
 
 #define TASK_PERIOD_MS_           (50)
@@ -61,7 +64,7 @@
 
 /********************** external data definition *****************************/
 
-extern SemaphoreHandle_t hsem_button;
+//extern SemaphoreHandle_t hsem_button;
 
 /********************** internal functions definition ************************/
 
@@ -115,6 +118,7 @@ static button_type_t button_process_state_(bool value)
 void task_button(void* argument)
 {
   button_init_();
+  ao_t ao_ui = (ao_t) argument;
 
   while(true)
   {
@@ -129,13 +133,16 @@ void task_button(void* argument)
         break;
       case BUTTON_TYPE_PULSE:
         LOGGER_INFO("button pulse");
-        xSemaphoreGive(hsem_button);
+        //xSemaphoreGive(hsem_button);
+        ao_ui_send(ao_ui, MSG_EVENT_BUTTON_PULSE);
         break;
       case BUTTON_TYPE_SHORT:
         LOGGER_INFO("button short");
+        ao_ui_send(ao_ui, MSG_EVENT_BUTTON_SHORT);
         break;
       case BUTTON_TYPE_LONG:
         LOGGER_INFO("button long");
+        ao_ui_send(ao_ui, MSG_EVENT_BUTTON_LONG);
         break;
       default:
         LOGGER_INFO("button error");
