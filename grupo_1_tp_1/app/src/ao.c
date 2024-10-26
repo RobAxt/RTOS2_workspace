@@ -35,6 +35,12 @@ ao_t ao_init(ao_event_handler_t event_handler)
 
   vQueueAddToRegistry(ao->queue_h, "Queue Handle");
 
+  ao->event_h = event_handler;
+  while(NULL == ao->event_h)
+  {
+    // error
+  }
+
   BaseType_t status;
   status = xTaskCreate(task_, "task_ao_", 128, (void* const)ao, tskIDLE_PRIORITY, NULL);
   while (pdPASS != status)
@@ -47,7 +53,7 @@ ao_t ao_init(ao_event_handler_t event_handler)
 
 bool ao_send(ao_t ao, ao_event_t event)
 {
-  return (pdPASS == xQueueSend(ao->queue_h, (void*)event, (TickType_t)0));
+  return (pdPASS == xQueueSend(ao->queue_h, (void*)&event, (TickType_t)0));
 }
 
 
