@@ -10,9 +10,13 @@
 #include <ao_led.h>
 #include <ao_ui.h>
 
+/********************** internal functions declaration ************************/
 static void event_handler(ao_event_t event);
 
+/*************************** internal data definition *****************************/
 static ao_t led_red, led_green, led_blue;
+
+/********************** external functions definition *****************************/
 
 ao_t ao_ui_init()
 {
@@ -30,7 +34,7 @@ bool ao_ui_send(ao_t ao, ao_ui_event_t event)
   return ao_send(ao, (ao_event_t)event);
 }
 
-/********************** internal functions declaration ************************/
+/********************** internal functions definition ************************/
 
 static void event_handler(ao_event_t event)
 {

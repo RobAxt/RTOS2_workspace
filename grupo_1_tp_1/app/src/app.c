@@ -45,6 +45,7 @@
 #include "task_ui.h"
 
 #include "ao.h"
+#include "ao_ui.h"
 
 /********************** macros and definitions *******************************/
 

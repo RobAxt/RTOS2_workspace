@@ -25,7 +25,7 @@ typedef enum
 
 static void event_handler(ao_event_t event);
 
-/********************** external data definition *****************************/
+/********************** external functions definition *****************************/
 
 ao_t ao_led_init()
 {
