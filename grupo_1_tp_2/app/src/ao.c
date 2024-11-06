@@ -26,8 +26,8 @@ static const uint8_t QUEUE_ITEM_SIZE_ = sizeof(ao_event_t);
 
 static QueueHandle_t queue_h;
 
-static const uint8_t MEMORY_POOL_NBLOCKS = 4;
-static const uint8_t MEMORY_POOL_BLOCK_SIZE = sizeof(struct ao_s);
+#define MEMORY_POOL_NBLOCKS  4
+#define MEMORY_POOL_BLOCK_SIZE  sizeof(struct ao_s)
 
 static memory_pool_t memory_pool_;
 static uint8_t memory_pool_memory_[MEMORY_POOL_SIZE(MEMORY_POOL_NBLOCKS, MEMORY_POOL_BLOCK_SIZE)];

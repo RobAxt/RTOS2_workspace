@@ -13,7 +13,6 @@
 /********************** internal data definition *****************************/
 static GPIO_TypeDef* led_port_[] = {LED_RED_PORT, LED_GREEN_PORT,  LED_BLUE_PORT};
 static uint16_t led_pin_[] = {LED_RED_PIN,  LED_GREEN_PIN, LED_BLUE_PIN };
-static const int32_t BLINK_DELAY = 1000;
 
 typedef enum
 {
