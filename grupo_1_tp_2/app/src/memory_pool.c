@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Sebastian Bedin <sebabedin@gmail.com>.
+ * Copyright (c) 2024 Sebastian Bedin <sebabedin@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,21 +40,9 @@
 
 #include "main.h"
 #include "cmsis_os.h"
-#include "board.h"
-#include "logger.h"
-#include "dwt.h"
-
-#include "ao.h"
-#include "ao_ui.h"
+#include "memory_pool.h"
 
 /********************** macros and definitions *******************************/
-
-#define TASK_PERIOD_MS_           (50)
-
-#define BUTTON_PERIOD_MS_         (TASK_PERIOD_MS_)
-#define BUTTON_PULSE_TIMEOUT_     (200)
-#define BUTTON_SHORT_TIMEOUT_     (1000)
-#define BUTTON_LONG_TIMEOUT_      (2000)
 
 /********************** internal data declaration ****************************/
 
@@ -64,92 +52,42 @@
 
 /********************** external data definition *****************************/
 
-//extern SemaphoreHandle_t hsem_button;
-
 /********************** internal functions definition ************************/
-
-typedef enum
-{
-  BUTTON_TYPE_NONE,
-  BUTTON_TYPE_PULSE,
-  BUTTON_TYPE_SHORT,
-  BUTTON_TYPE_LONG,
-  BUTTON_TYPE__N,
-} button_type_t;
-
-static struct
-{
-    uint32_t counter;
-} button;
-
-static void button_init_(void)
-{
-  button.counter = 0;
-}
-
-static button_type_t button_process_state_(bool value)
-{
-  button_type_t ret = BUTTON_TYPE_NONE;
-  if(value)
-  {
-    button.counter += BUTTON_PERIOD_MS_;
-  }
-  else
-  {
-    if(BUTTON_LONG_TIMEOUT_ <= button.counter)
-    {
-      ret = BUTTON_TYPE_LONG;
-    }
-    else if(BUTTON_SHORT_TIMEOUT_ <= button.counter)
-    {
-      ret = BUTTON_TYPE_SHORT;
-    }
-    else if(BUTTON_PULSE_TIMEOUT_ <= button.counter)
-    {
-      ret = BUTTON_TYPE_PULSE;
-    }
-    button.counter = 0;
-  }
-  return ret;
-}
 
 /********************** external functions definition ************************/
 
-void task_button(void* argument)
+void memory_pool_init(memory_pool_t* hmp, void* pmemory, size_t nblocks, size_t block_size)
 {
-  button_init_();
-  ao_t ao_ui = (ao_t) argument;
+  linked_list_t* hlist = &(hmp->block_list);
+  linked_list_init(hlist);
 
-  while(true)
+  for(size_t i = 0; i < nblocks; ++i)
   {
-    GPIO_PinState button_state;
-    button_state = HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN);
-
-    button_type_t button_type;
-    button_type = button_process_state_(button_state);
-
-    switch (button_type) {
-      case BUTTON_TYPE_NONE:
-        break;
-      case BUTTON_TYPE_PULSE:
-        LOGGER_INFO("button pulse");
-        ao_ui_send(ao_ui, MSG_EVENT_BUTTON_PULSE);
-        break;
-      case BUTTON_TYPE_SHORT:
-        LOGGER_INFO("button short");
-        ao_ui_send(ao_ui, MSG_EVENT_BUTTON_SHORT);
-        break;
-      case BUTTON_TYPE_LONG:
-        LOGGER_INFO("button long");
-        ao_ui_send(ao_ui, MSG_EVENT_BUTTON_LONG);
-        break;
-      default:
-        LOGGER_INFO("button error");
-        break;
-    }
-
-    vTaskDelay((TickType_t)(TASK_PERIOD_MS_ / portTICK_PERIOD_MS));
+    void* pblock = pmemory + i*block_size;
+    linked_list_node_init((memory_pool_block_t*)pblock, NULL);
+    linked_list_node_add(hlist, pblock);
   }
+}
+
+void* memory_pool_block_get(memory_pool_t* hmp)
+{
+  portENTER_CRITICAL();
+  linked_list_t* hlist = &(hmp->block_list);
+  void* pblock = (void*)linked_list_node_remove(hlist);
+  portEXIT_CRITICAL();
+  return pblock;
+}
+
+void memory_pool_block_put(memory_pool_t* hmp, void* pblock)
+{
+  portENTER_CRITICAL();
+  if(NULL != pblock)
+  {
+    linked_list_t* hlist = &(hmp->block_list);
+    linked_list_node_init((memory_pool_block_t*)pblock, NULL);
+    linked_list_node_add(hlist, pblock);
+  }
+  portEXIT_CRITICAL();
 }
 
 /********************** end of file ******************************************/

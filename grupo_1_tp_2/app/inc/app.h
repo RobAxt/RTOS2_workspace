@@ -32,50 +32,30 @@
  * @author : Sebastian Bedin <sebabedin@gmail.com>
  */
 
+#ifndef APP_H_
+#define APP_H_
+
+/********************** CPP guard ********************************************/
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************** inclusions *******************************************/
 
-#include "main.h"
-#include "cmsis_os.h"
-#include "logger.h"
-#include "dwt.h"
-#include "board.h"
+/********************** macros ***********************************************/
 
-#include "task_button.h"
+/********************** typedef **********************************************/
 
-#include "ao.h"
-#include "ao_ui.h"
+/********************** external data declaration ****************************/
 
-/********************** macros and definitions *******************************/
+/********************** external functions declaration ***********************/
+void app_init(void);
 
-/********************** internal data declaration ****************************/
-
-/********************** internal functions declaration ***********************/
-
-/********************** internal data definition *****************************/
-
-/********************** external data declaration *****************************/
-static ao_t ui;
-
-/********************** external functions definition ************************/
-void app_init(void)
-{
-  ui = ao_ui_init();
-  while(NULL == ui)
-  {
-    //error
-  }
-
-  BaseType_t status;
-
-  status = xTaskCreate(task_button, "task_button", 128, (void*) ui, tskIDLE_PRIORITY, NULL);
-  while (pdPASS != status)
-  {
-    // error
-  }
-
-  LOGGER_INFO("app init");
-
-  cycle_counter_init();
+/********************** End of CPP guard *************************************/
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* APP_H_ */
 
 /********************** end of file ******************************************/

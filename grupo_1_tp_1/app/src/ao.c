@@ -56,7 +56,6 @@ bool ao_send(ao_t ao, ao_event_t event)
   return (pdPASS == xQueueSend(ao->queue_h, (void*)&event, (TickType_t)0));
 }
 
-
 static ao_t get_ao_intance(void)
 {
   static struct ao_s instances[AO_MAX_INSTANCES] = {0};
