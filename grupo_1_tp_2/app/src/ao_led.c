@@ -22,13 +22,6 @@ typedef enum
   AO_LED_COLOR_BLUE,
 } ao_led_color;
 
-//typedef struct
-//{
-//  struct ao_s base;
-//  ao_led_color color;
-//} ao_led_s;
-// ao_led.c:27:15: error: field 'base' has incomplete type
-
 /********************** internal functions declaration ************************/
 static void event_handler(ao_event_t event);
 
@@ -54,35 +47,26 @@ static void event_handler(ao_event_t event)
   {
     case AO_LED_MESSAGE_RED_ON:
       HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_RED], led_pin_[AO_LED_COLOR_RED], GPIO_PIN_SET);
+      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_GREEN], led_pin_[AO_LED_COLOR_GREEN], GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_BLUE], led_pin_[AO_LED_COLOR_BLUE], GPIO_PIN_SET);
       break;
     case AO_LED_MESSAGE_RED_OFF:
       HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_RED], led_pin_[AO_LED_COLOR_RED], GPIO_PIN_RESET);
       break;
-    case AO_LED_MESSAGE_RED_BLINK:
-      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_RED], led_pin_[AO_LED_COLOR_RED], GPIO_PIN_SET);
-      vTaskDelay((TickType_t)((BLINK_DELAY) / portTICK_PERIOD_MS));
-      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_RED], led_pin_[AO_LED_COLOR_RED], GPIO_PIN_RESET);
-      break;
     case AO_LED_MESSAGE_GREEN_ON:
+      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_RED], led_pin_[AO_LED_COLOR_RED], GPIO_PIN_RESET);
       HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_GREEN], led_pin_[AO_LED_COLOR_GREEN], GPIO_PIN_SET);
+      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_BLUE], led_pin_[AO_LED_COLOR_BLUE], GPIO_PIN_RESET);
       break;
     case AO_LED_MESSAGE_GREEN_OFF:
       HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_GREEN], led_pin_[AO_LED_COLOR_GREEN], GPIO_PIN_RESET);
       break;
-    case AO_LED_MESSAGE_GREEN_BLINK:
-      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_GREEN], led_pin_[AO_LED_COLOR_GREEN], GPIO_PIN_SET);
-      vTaskDelay((TickType_t)((BLINK_DELAY) / portTICK_PERIOD_MS));
-      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_GREEN], led_pin_[AO_LED_COLOR_GREEN], GPIO_PIN_RESET);
-      break;
     case AO_LED_MESSAGE_BLUE_ON:
+      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_RED], led_pin_[AO_LED_COLOR_RED], GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_GREEN], led_pin_[AO_LED_COLOR_GREEN], GPIO_PIN_RESET);
       HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_BLUE], led_pin_[AO_LED_COLOR_BLUE], GPIO_PIN_SET);
       break;
     case AO_LED_MESSAGE_BLUE_OFF:
-      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_BLUE], led_pin_[AO_LED_COLOR_BLUE], GPIO_PIN_RESET);
-      break;
-    case AO_LED_MESSAGE_BLUE_BLINK:
-      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_BLUE], led_pin_[AO_LED_COLOR_BLUE], GPIO_PIN_SET);
-      vTaskDelay((TickType_t)((BLINK_DELAY) / portTICK_PERIOD_MS));
       HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_BLUE], led_pin_[AO_LED_COLOR_BLUE], GPIO_PIN_RESET);
       break;
     default:

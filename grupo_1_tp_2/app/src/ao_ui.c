@@ -42,13 +42,13 @@ static void event_handler(ao_event_t event)
   switch (event_)
   {
     case MSG_EVENT_BUTTON_PULSE:
-      ao_led_send(led_red, AO_LED_MESSAGE_RED_BLINK);
+      ao_led_send(led_red, AO_LED_MESSAGE_RED_ON);
       break;
     case MSG_EVENT_BUTTON_SHORT:
-      ao_led_send(led_green, AO_LED_MESSAGE_GREEN_BLINK);
+      ao_led_send(led_green, AO_LED_MESSAGE_GREEN_ON);
       break;
     case MSG_EVENT_BUTTON_LONG:
-      ao_led_send(led_blue, AO_LED_MESSAGE_BLUE_BLINK);
+      ao_led_send(led_blue, AO_LED_MESSAGE_BLUE_ON);
       break;
     default:
   }
