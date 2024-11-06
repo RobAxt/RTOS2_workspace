@@ -1,4 +1,4 @@
-# Repositorio de entregas de TP 1  del grupo 1
+# Repositorio de entregas de TP 2  del grupo 1
 
 ## Integrantes
 

@@ -23,31 +23,33 @@ typedef enum
 
 /********************** internal functions declaration ************************/
 static void event_handler(ao_event_t event);
-
+static void postevent_handler(ao_event_t event);
 /********************** external functions definition *****************************/
 
 ao_t ao_led_init()
 {
-  ao_t ao_led_h = ao_init(event_handler);
+  ao_t ao_led_h = ao_init(event_handler, postevent_handler);
   return ao_led_h;
 }
 
 bool ao_led_send(ao_t ao, ao_led_event_t event)
 {
-  return ao_send(ao, (ao_event_t)event);
+  ao_led_event_t* currente_event = (ao_led_event_t*)pvPortMalloc(sizeof(ao_led_event_t));
+  *currente_event = event;
+  return ao_send(ao, (ao_msg_t)currente_event);
 }
 
 /********************** internal functions definition ************************/
 
 static void event_handler(ao_event_t event)
 {
-  ao_led_event_t event_ = (ao_led_event_t) event;
-  switch (event_)
+  ao_led_event_t* event_ = (ao_led_event_t*) event;
+  switch (*event_)
   {
     case AO_LED_MESSAGE_RED_ON:
       HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_RED], led_pin_[AO_LED_COLOR_RED], GPIO_PIN_SET);
       HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_GREEN], led_pin_[AO_LED_COLOR_GREEN], GPIO_PIN_RESET);
-      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_BLUE], led_pin_[AO_LED_COLOR_BLUE], GPIO_PIN_SET);
+      HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_BLUE], led_pin_[AO_LED_COLOR_BLUE], GPIO_PIN_RESET);
       break;
     case AO_LED_MESSAGE_RED_OFF:
       HAL_GPIO_WritePin(led_port_[AO_LED_COLOR_RED], led_pin_[AO_LED_COLOR_RED], GPIO_PIN_RESET);
@@ -70,4 +72,9 @@ static void event_handler(ao_event_t event)
       break;
     default:
   }
+}
+
+void postevent_handler(ao_event_t event)
+{
+  vPortFree((void*)event);
 }
