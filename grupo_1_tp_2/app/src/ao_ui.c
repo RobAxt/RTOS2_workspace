@@ -29,18 +29,22 @@ ao_t ao_ui_init()
   return ao_ui_h;
 }
 
-bool ao_ui_send(ao_t ao, ao_ui_event_t event)
+bool ao_ui_send(ao_t ao, ao_ui_msg_t event)
 {
-  ao_ui_event_t* currente_event = (ao_ui_event_t*)pvPortMalloc(sizeof(ao_ui_event_t));
-  *currente_event = event;
-  return ao_send(ao, (ao_msg_t)currente_event);
+  ao_ui_msg_t* current_msg = (ao_ui_msg_t*)pvPortMalloc(sizeof(ao_ui_msg_t));
+  if(NULL != current_msg)
+  {
+    *current_msg = event;
+    return ao_send(ao, (ao_msg_t)current_msg);
+  }
+  return pdFALSE;
 }
 
 /********************** internal functions definition ************************/
 
 static void event_handler(ao_event_t event)
 {
-  ao_ui_event_t* event_ = (ao_ui_event_t*) event;
+  ao_ui_msg_t* event_ = (ao_ui_msg_t*) event;
   switch (*event_)
   {
     case MSG_EVENT_BUTTON_PULSE:

@@ -32,18 +32,22 @@ ao_t ao_led_init()
   return ao_led_h;
 }
 
-bool ao_led_send(ao_t ao, ao_led_event_t event)
+bool ao_led_send(ao_t ao, ao_led_msg_t event)
 {
-  ao_led_event_t* currente_event = (ao_led_event_t*)pvPortMalloc(sizeof(ao_led_event_t));
-  *currente_event = event;
-  return ao_send(ao, (ao_msg_t)currente_event);
+  ao_led_msg_t* current_event = (ao_led_msg_t*)pvPortMalloc(sizeof(ao_led_msg_t));
+  if(NULL != current_event)
+  {
+    *current_event = event;
+    return ao_send(ao, (ao_msg_t)current_event);
+  }
+  return pdFALSE;
 }
 
 /********************** internal functions definition ************************/
 
 static void event_handler(ao_event_t event)
 {
-  ao_led_event_t* event_ = (ao_led_event_t*) event;
+  ao_led_msg_t* event_ = (ao_led_msg_t*) event;
   switch (*event_)
   {
     case AO_LED_MESSAGE_RED_ON:
