@@ -50,11 +50,6 @@ ao_t ao_init(ao_event_handler_t event_handler, ao_postevent_handler_t postevent_
      }
      vQueueAddToRegistry(queue_h, "Queue Handle");
 
-//     BaseType_t status = xTaskCreate(task_, "task_ao_", 128, NULL, tskIDLE_PRIORITY, NULL);
-//     while (pdPASS != status)
-//     {
-        // error
-//     }
      taskENTER_CRITICAL();
      msg_task_active = pdFALSE;
      taskEXIT_CRITICAL();
@@ -83,7 +78,7 @@ ao_t ao_init(ao_event_handler_t event_handler, ao_postevent_handler_t postevent_
   return ao;
 }
 
-bool ao_send(ao_t ao, ao_msg_t eventMsg) // TODO: unificar los returns.
+bool ao_send(ao_t ao, ao_msg_t eventMsg)
 {
   ao_event_t event = (ao_event_t)pvPortMalloc(sizeof(struct ao_event_s));
   if(NULL != event)
@@ -105,7 +100,6 @@ bool ao_send(ao_t ao, ao_msg_t eventMsg) // TODO: unificar los returns.
 	{
 	   // error
 	}
-
 	msg_task_active = pdTRUE;
       }
       taskEXIT_CRITICAL();
