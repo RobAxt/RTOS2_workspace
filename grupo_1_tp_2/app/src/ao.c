@@ -78,6 +78,11 @@ ao_t ao_init(ao_event_handler_t event_handler, ao_postevent_handler_t postevent_
   return ao;
 }
 
+void ao_finish(ao_t ao)
+{
+  memory_pool_block_put(hmp, (void*)ao);
+}
+
 bool ao_send(ao_t ao, ao_msg_t eventMsg)
 {
   ao_event_t event = (ao_event_t)pvPortMalloc(sizeof(struct ao_event_s));
@@ -93,16 +98,24 @@ bool ao_send(ao_t ao, ao_msg_t eventMsg)
     else
     {
       taskENTER_CRITICAL();
-      if(pdFALSE == msg_task_active)
+      bool task_state = msg_task_active;
+      taskEXIT_CRITICAL();
+      if(pdFALSE == task_state)
       {
         BaseType_t status = xTaskCreate(task_, "task_ao_", 128, NULL, tskIDLE_PRIORITY, NULL);
-	while (pdPASS != status)
+	if(pdPASS != status)
 	{
-	   // error
+	  vPortFree((void*)event);
+	  return pdFALSE;
 	}
-	msg_task_active = pdTRUE;
+	else
+	{
+	  task_state = pdTRUE;
+	  taskENTER_CRITICAL();
+	  msg_task_active = task_state;
+          taskEXIT_CRITICAL();
+	}
       }
-      taskEXIT_CRITICAL();
     }
     return pdTRUE;
   }

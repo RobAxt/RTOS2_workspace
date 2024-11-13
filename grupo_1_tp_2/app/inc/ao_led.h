@@ -15,9 +15,7 @@ typedef enum
   AO_LED_MESSAGE_BLUE_OFF,
 } ao_led_msg_t;
 
-
 ao_t ao_led_init();
 bool ao_led_send(ao_t ao, ao_led_msg_t event);
-
 
 #endif /* INC_AO_LED_H_ */

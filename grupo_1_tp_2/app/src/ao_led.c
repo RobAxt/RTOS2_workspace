@@ -22,8 +22,8 @@ typedef enum
 } ao_led_color;
 
 /********************** internal functions declaration ************************/
-static void event_handler(ao_event_t event);
-static void postevent_handler(ao_event_t event);
+static void event_handler(ao_msg_t event);
+static void postevent_handler(ao_msg_t event);
 /********************** external functions definition *****************************/
 
 ao_t ao_led_init()
@@ -34,18 +34,23 @@ ao_t ao_led_init()
 
 bool ao_led_send(ao_t ao, ao_led_msg_t event)
 {
-  ao_led_msg_t* current_event = (ao_led_msg_t*)pvPortMalloc(sizeof(ao_led_msg_t));
-  if(NULL != current_event)
+  ao_led_msg_t* current_msg = (ao_led_msg_t*)pvPortMalloc(sizeof(ao_led_msg_t));
+  if(NULL != current_msg)
   {
-    *current_event = event;
-    return ao_send(ao, (ao_msg_t)current_event);
+    *current_msg = event;
+    if(pdFALSE == ao_send(ao, (ao_msg_t)current_msg))
+    {
+       vPortFree((void*)current_msg);
+       return pdFALSE;
+    }
+    return pdTRUE;
   }
   return pdFALSE;
 }
 
 /********************** internal functions definition ************************/
 
-static void event_handler(ao_event_t event)
+static void event_handler(ao_msg_t event)
 {
   ao_led_msg_t* event_ = (ao_led_msg_t*) event;
   switch (*event_)
@@ -78,7 +83,7 @@ static void event_handler(ao_event_t event)
   }
 }
 
-void postevent_handler(ao_event_t event)
+void postevent_handler(ao_msg_t event)
 {
   vPortFree((void*)event);
 }
