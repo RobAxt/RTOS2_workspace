@@ -106,6 +106,7 @@ bool ao_send(ao_t ao, ao_msg_t eventMsg)
 	if(pdPASS != status)
 	{
 	  vPortFree((void*)event);
+	  xQueueReceive(queue_h, &event, (TickType_t )0);
 	  return pdFALSE;
 	}
 	else
