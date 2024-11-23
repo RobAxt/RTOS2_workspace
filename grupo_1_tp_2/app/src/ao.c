@@ -7,7 +7,7 @@
 #include "memory_pool.h"
 #include "ao.h"
 
-static bool msg_task_active;
+static SemaphoreHandle_t taskProcessing;
 static void task_(void *argument);
 
 struct ao_event_s
@@ -50,10 +50,13 @@ ao_t ao_init(ao_event_handler_t event_handler, ao_postevent_handler_t postevent_
      }
      vQueueAddToRegistry(queue_h, "Queue Handle");
 
-     taskENTER_CRITICAL();
-     msg_task_active = pdFALSE;
-     taskEXIT_CRITICAL();
-
+     taskProcessing = xSemaphoreCreateBinary();
+     while(NULL == taskProcessing)
+     {
+       // Error
+     }
+     vQueueAddToRegistry(taskProcessing, "Task running Semaphore");
+     xSemaphoreGive(taskProcessing);
      ao_created = pdTRUE;
   }
 
@@ -97,25 +100,19 @@ bool ao_send(ao_t ao, ao_msg_t eventMsg)
     }
     else
     {
-      taskENTER_CRITICAL();
-      bool task_state = msg_task_active;
-      taskEXIT_CRITICAL();
-      if(pdFALSE == task_state)
+      if(pdFALSE != xSemaphoreTake(taskProcessing, (TickType_t)0))
       {
         BaseType_t status = xTaskCreate(task_, "task_ao_", 128, NULL, tskIDLE_PRIORITY, NULL);
-	if(pdPASS != status)
-	{
-	  vPortFree((void*)event);
-	  xQueueReceive(queue_h, &event, (TickType_t )0);
-	  return pdFALSE;
-	}
-	else
-	{
-	  task_state = pdTRUE;
-	  taskENTER_CRITICAL();
-	  msg_task_active = task_state;
-          taskEXIT_CRITICAL();
-	}
+        if(pdPASS != status)
+        {
+          vPortFree((void*)event);
+          xQueueReceive(queue_h, &event, (TickType_t)0);
+          return pdFALSE;
+        }
+        else
+        {
+          xSemaphoreTake(taskProcessing, (TickType_t)0);
+        }
       }
     }
     return pdTRUE;
@@ -126,14 +123,12 @@ bool ao_send(ao_t ao, ao_msg_t eventMsg)
 static void task_(void *argument)
 {
   ao_event_t msg;
-  while(pdPASS == xQueueReceive(queue_h, &msg, (TickType_t )0))
+  while(pdPASS == xQueueReceive(queue_h, &msg, (TickType_t)0))
   {
      msg->ao_h->event_h(msg->msg_h);
      msg->ao_h->post_event_h(msg->msg_h);
      vPortFree((void*)msg);
   }
-  taskENTER_CRITICAL();
-  msg_task_active = pdFALSE;
-  taskEXIT_CRITICAL();
+  xSemaphoreGive(taskProcessing);
   vTaskDelete(NULL);
 }
