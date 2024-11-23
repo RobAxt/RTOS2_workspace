@@ -1,4 +1,3 @@
-
 #include "main.h"
 #include "cmsis_os.h"
 #include "logger.h"
@@ -6,14 +5,12 @@
 #include "board.h"
 #include "pao.h"
 
-static const uint8_t QUEUE_LENGTH_= 3;
-static const uint8_t QUEUE_ITEM_SIZE_ = sizeof(pao_event_t);
+#define NON_BLOCKED_QUEUE_DELAY 10
 
 struct pao_s
 {
-  QueueHandle_t queue_h;   // TODO: declarar queue
+  priority_queue_t pqueue_h;
   pao_event_handler_t event_h;
-  bool used;
 };
 
 static void task_(void *argument);
@@ -26,8 +23,8 @@ pao_t pao_init(pao_event_handler_t event_handler)
     // error
   }
 
-  pao->queue_h = NULL;   // TODO: Crear la fucking cola
-  while(NULL == pao->queue_h)
+  pao->pqueue_h =  init_queue();
+  while(NULL == pao->pqueue_h)
   {
     // error
   }
@@ -48,9 +45,9 @@ pao_t pao_init(pao_event_handler_t event_handler)
   return pao;
 }
 
-bool pao_send(pao_t pao, pao_event_t event)
+bool pao_send(pao_t pao, pao_event_t event, priority_t priority)
 {
-  return (pdPASS == xQueueSend(pao->queue_h, (void*)&event, (TickType_t)0)); // TODO: enqueue
+  return (pdPASS == enqueue(pao->pqueue_h, priority, (data_t) event));
 }
 
 static void task_(void *argument)
@@ -59,9 +56,10 @@ static void task_(void *argument)
   while (true)
   {
     pao_event_t msg;
-    if (pdPASS == xQueueReceive(pao->queue_h, &msg, portMAX_DELAY)) // TODO: dequeue
+    if (pdPASS == dequeue(pao->pqueue_h, (data_t *) &msg))
     {
 	pao->event_h(msg);
     }
+    vTaskDelay((TickType_t)((NON_BLOCKED_QUEUE_DELAY) / portTICK_PERIOD_MS));
   }
 }

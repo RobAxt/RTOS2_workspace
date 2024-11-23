@@ -7,14 +7,16 @@
 #include "board.h"
 #include "logger.h"
 #include "dwt.h"
-#include <ao_led.h>
+#include <ao.h>
 #include <ao_ui.h>
+#include <pao.h>
+#include <pao_led.h>
 
 /********************** internal functions declaration ************************/
 static void event_handler(ao_event_t event);
 
 /*************************** internal data definition *****************************/
-static ao_t led_red, led_green, led_blue;
+static pao_t led;
 
 /********************** external functions definition *****************************/
 
@@ -22,9 +24,7 @@ ao_t ao_ui_init()
 {
   ao_t ao_ui_h = ao_init(event_handler);
 
-  led_red = ao_led_init();
-  led_green = ao_led_init();
-  led_blue = ao_led_init();
+  led = pao_led_init();
 
   return ao_ui_h;
 }
@@ -42,13 +42,13 @@ static void event_handler(ao_event_t event)
   switch (event_)
   {
     case MSG_EVENT_BUTTON_PULSE:
-      ao_led_send(led_red, AO_LED_MESSAGE_RED_BLINK);
+      pao_led_send(led, AO_LED_MESSAGE_RED_BLINK, HIGH);
       break;
     case MSG_EVENT_BUTTON_SHORT:
-      ao_led_send(led_green, AO_LED_MESSAGE_GREEN_BLINK);
+      pao_led_send(led, AO_LED_MESSAGE_GREEN_BLINK, MEDIUM);
       break;
     case MSG_EVENT_BUTTON_LONG:
-      ao_led_send(led_blue, AO_LED_MESSAGE_BLUE_BLINK);
+      pao_led_send(led, AO_LED_MESSAGE_BLUE_BLINK, LOW);
       break;
     default:
   }

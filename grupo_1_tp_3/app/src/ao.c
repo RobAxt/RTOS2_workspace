@@ -13,7 +13,6 @@ struct ao_s
 {
   QueueHandle_t queue_h;
   ao_event_handler_t event_h;
-  bool used;
 };
 
 static void task_(void *argument);

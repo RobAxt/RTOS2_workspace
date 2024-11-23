@@ -14,5 +14,4 @@ typedef enum
 ao_t ao_ui_init();
 bool ao_ui_send(ao_t ao, ao_ui_event_t event);
 
-
 #endif /* INC_AO_UI_H_ */
