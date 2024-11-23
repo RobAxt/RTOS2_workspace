@@ -86,5 +86,5 @@ bool dequeue(priority_queue_t queue, data_t * data)
   queue->size--;
 
   xSemaphoreGive(queue->mtx);
-  return data;
+  return pdTRUE;
 }
