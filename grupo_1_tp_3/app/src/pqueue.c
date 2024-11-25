@@ -48,7 +48,7 @@ bool enqueue(priority_queue_t queue, priority_t priority, data_t data)
     return pdFALSE;
   }
 
-   int i;
+   int8_t i;
    for(i = queue->size - 1; (i >= 0 && queue->elements[i].priority < priority); i--)
    {
      queue->elements[i + 1].priority = queue->elements[i].priority;
@@ -78,10 +78,10 @@ bool dequeue(priority_queue_t queue, data_t * data)
 
   *data = queue->elements[0].data;
 
-  for(int i = 1; i < queue->size; i++)
+  for(int8_t i = 1; i < queue->size; i++)
   {
-    queue->elements[i + 1].priority = queue->elements[i].priority;
-    queue->elements[i + 1].data = queue->elements[i].data;
+    queue->elements[i - 1].priority = queue->elements[i].priority;
+    queue->elements[i - 1].data = queue->elements[i].data;
   }
   queue->size--;
 
