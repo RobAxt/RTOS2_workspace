@@ -42,7 +42,7 @@ bool enqueue(priority_queue_t queue, priority_t priority, data_t data)
 
   xSemaphoreTake(queue->mtx, portMAX_DELAY);
 
-  if(10 <= queue->size)
+  if(MAX_SIZE <= queue->size)
   {
     xSemaphoreGive(queue->mtx);
     return pdFALSE;
